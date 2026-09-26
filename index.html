@@ -3,49 +3,88 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-
-<!-- KOPF-SPERRE · atomar -->
 <meta http-equiv="Content-Security-Policy" content="
   default-src 'self';
   script-src 'self' 'unsafe-inline';
   style-src 'self' 'unsafe-inline';
-  img-src 'self' data:;
-  font-src 'self';
-  connect-src 'self';
   frame-ancestors 'self';
-  base-uri 'self';
-  form-action 'self';
   object-src 'none';
-  upgrade-insecure-requests;
 ">
-<meta name="referrer" content="no-referrer">
-<meta http-equiv="X-Content-Type-Options" content="nosniff">
-<meta name="permissions-policy" content="
-  camera=(), microphone=(), geolocation=(),
-  payment=(), usb=(), magnetometer=(), gyroscope=()
-">
+<title>atom · frieden · iki1uc</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;background:#04070c;color:#8aa8a0;
+            font-family:'Consolas','Courier New',monospace;overflow:hidden}
+  canvas{display:block;position:fixed;inset:0}
 
-<!-- 1 · TORWÄCHTER · läuft als allererstes -->
+  #kopf{position:fixed;top:32px;left:50%;transform:translateX(-50%);
+        text-align:center;z-index:6;pointer-events:none}
+  #kopf .marke{font-size:9px;letter-spacing:.55em;color:#2a4a3a;margin-bottom:10px}
+  #kopf h1{font-size:clamp(20px,4vw,36px);font-weight:100;letter-spacing:.45em;
+           color:#8cf0d0;text-shadow:0 0 40px rgba(140,240,208,.2)}
+  #kopf .unter{font-size:10px;letter-spacing:.4em;color:#3a5a4a;margin-top:10px}
+
+  #werte{position:fixed;top:50%;left:24px;transform:translateY(-50%);
+         z-index:6;pointer-events:none;font-size:10px;letter-spacing:.25em;
+         line-height:2.4;color:#3a5a4a}
+  #werte .z{display:grid;grid-template-columns:50px 80px 50px;gap:8px;
+            align-items:center}
+  #werte .k{color:#3a5a4a}
+  #werte .v{color:#8cf0d0;text-align:right;font-weight:bold}
+  #werte .b{height:3px;background:#0a1c24;position:relative;overflow:hidden}
+  #werte .b i{display:block;height:100%;background:#8cf0d0;transition:width .3s}
+
+  #frieden{position:fixed;bottom:60px;left:50%;transform:translateX(-50%);
+           text-align:center;z-index:6;pointer-events:none;
+           font-size:11px;letter-spacing:.5em;
+           transition:color .8s, text-shadow .8s}
+  #frieden.an{color:#8cf0d0;text-shadow:0 0 30px rgba(140,240,208,.5)}
+  #frieden.aus{color:#3a5a4a}
+
+  #satz{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+        font-size:9px;letter-spacing:.35em;color:#2a4a3a;
+        z-index:6;pointer-events:none;text-align:center;line-height:2.2}
+
+  #fuss{position:fixed;bottom:14px;right:20px;font-size:9px;
+        letter-spacing:.35em;color:#1e3328;z-index:6}
+  #fuss b{color:#3a5a4a;font-weight:400}
+
+  .ecke{position:fixed;width:14px;height:14px;z-index:998;
+        pointer-events:none;opacity:.28;border-color:#8cf0d0}
+  .ecke.ol{top:12px;left:12px;border-top:1px solid;border-left:1px solid}
+  .ecke.or{top:12px;right:12px;border-top:1px solid;border-right:1px solid}
+  .ecke.ul{bottom:12px;left:12px;border-bottom:1px solid;border-left:1px solid}
+  .ecke.ur{bottom:12px;right:12px;border-bottom:1px solid;border-right:1px solid}
+
+  #sperre{display:none}
+  html[data-gate="gesperrt"] body > *:not(#sperre){display:none !important}
+  html[data-gate="gesperrt"] #sperre{
+    display:flex;position:fixed;inset:0;
+    align-items:center;justify-content:center;flex-direction:column;
+    background:#04070c;z-index:9999;text-align:center;padding:24px}
+  #sperre .wort{font-size:clamp(22px,5vw,44px);font-weight:100;
+                letter-spacing:.45em;color:#8cf0d0;margin-bottom:16px}
+  #sperre .grund{font-size:10px;letter-spacing:.35em;color:#b388ff}
+</style>
+</head>
+<body>
+
+<!-- 1 · TORWÄCHTER -->
 <script>
-  window.__EVO_GATE = {
-    ok: false,
-    grund: 'wächter noch nicht geprüft',
-    zeit: Date.now(),
-  };
+  window.__EVO_GATE = { ok:false, grund:'wird geprüft', zeit:Date.now() };
 </script>
 
 <!-- 2 · DER WÄCHTER -->
 <script src="security.js"></script>
 
-<!-- 3 · TÜRSTEHER · prüft sofort -->
+<!-- 3 · TÜRSTEHER -->
 <script>
   (function(){
     if(window.__EVO_WACHE === true){
       window.__EVO_GATE.ok = true;
       window.__EVO_GATE.grund = 'wächter aktiv';
     } else {
-      window.__EVO_GATE.ok = false;
-      window.__EVO_GATE.grund = 'security.js fehlt oder fehlgeschlagen';
+      window.__EVO_GATE.grund = 'security.js fehlt';
       document.documentElement.setAttribute('data-gate','gesperrt');
       document.addEventListener('DOMContentLoaded', () => {
         const g = document.getElementById('sperre-grund');
@@ -55,179 +94,33 @@
   })();
 </script>
 
-<title>evoMIND · index · iki1uc</title>
-
-<style>
-  *{margin:0;padding:0;box-sizing:border-box}
-  html,body{height:100%;background:#05070e;color:#8aa8a0;
-            font-family:'Consolas','Courier New',monospace;overflow:hidden}
-
-  canvas{display:block;position:fixed;inset:0}
-
-  /* ─── KOPF ──────────────────────────────────────── */
-  #kopf{
-    position:fixed;top:44px;left:50%;transform:translateX(-50%);
-    text-align:center;z-index:6;pointer-events:none;
-  }
-  #kopf .marke{font-size:9px;letter-spacing:.55em;color:#2a4a3a;margin-bottom:10px}
-  #kopf h1{
-    font-size:clamp(20px,4vw,38px);font-weight:100;letter-spacing:.4em;
-    background:linear-gradient(135deg,#8cf0d0,#f0d080 55%,#b388ff);
-    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-    margin-bottom:10px;
-  }
-  #kopf .unter{font-size:10px;letter-spacing:.4em;color:#3a5a4a;line-height:2.2}
-  #kopf .unter b{color:#8cf0d0;font-weight:400}
-
-  /* ─── TÜREN ─────────────────────────────────────── */
-  #tueren{
-    position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
-    display:flex;flex-direction:column;gap:14px;z-index:7;
-    align-items:center;padding:28px 32px;
-    background:rgba(5,7,14,.65);backdrop-filter:blur(6px);
-    border:1px solid rgba(120,220,150,.06);border-radius:4px;
-  }
-  #tueren a{
-    color:#8aa8a0;text-decoration:none;
-    font-size:11px;letter-spacing:.4em;padding:6px 20px;
-    border-bottom:1px solid transparent;transition:all .35s;
-    white-space:nowrap;display:flex;align-items:center;gap:12px;
-  }
-  #tueren a .mark{
-    width:6px;height:6px;border-radius:50%;
-    background:currentColor;opacity:.4;transition:opacity .35s;
-  }
-  #tueren a:hover{color:#8cf0d0;border-bottom-color:rgba(140,240,208,.4)}
-  #tueren a:hover .mark{opacity:1}
-  #tueren a.gold:hover{color:#f0d080;border-bottom-color:rgba(240,208,128,.4)}
-  #tueren a.purpur:hover{color:#b388ff;border-bottom-color:rgba(179,136,255,.4)}
-
-  /* ─── SETZUNG ───────────────────────────────────── */
-  #setzung{
-    position:fixed;bottom:40px;left:50%;transform:translateX(-50%);
-    text-align:center;z-index:6;pointer-events:none;
-    max-width:min(92vw,760px);line-height:2.2;
-  }
-  #setzung .zeile{font-size:10px;letter-spacing:.35em;color:#3a5a4a}
-  #setzung .zeile b{color:#8cf0d0;font-weight:400}
-  #setzung .zeile.gold b{color:#f0d080}
-  #setzung .zeile.purpur b{color:#b388ff}
-  #setzung .trenn{width:40px;height:1px;background:rgba(120,220,150,.15);margin:12px auto}
-
-  /* ─── STATUS ────────────────────────────────────── */
-  #status{
-    position:fixed;top:22px;right:22px;z-index:6;pointer-events:none;
-    font-size:8.5px;letter-spacing:.3em;color:#2a4a3a;
-    text-align:right;line-height:2;
-  }
-  #status .v{color:#8cf0d0}
-  #status .warn{color:#f0d080}
-
-  /* ─── FUSS ──────────────────────────────────────── */
-  #fuss{
-    position:fixed;bottom:14px;right:20px;
-    font-size:9px;letter-spacing:.35em;color:#1e3328;z-index:6;
-  }
-  #fuss b{color:#3a5a4a;font-weight:400}
-
-  /* ─── ZEICHEN ───────────────────────────────────── */
-  .ecke{position:fixed;width:14px;height:14px;
-        z-index:998;pointer-events:none;opacity:.28;border-color:#8cf0d0}
-  .ecke.ol{top:12px;left:12px;border-top:1px solid;border-left:1px solid}
-  .ecke.or{top:12px;right:12px;border-top:1px solid;border-right:1px solid}
-  .ecke.ul{bottom:12px;left:12px;border-bottom:1px solid;border-left:1px solid}
-  .ecke.ur{bottom:12px;right:12px;border-bottom:1px solid;border-right:1px solid}
-
-  /* ─── SPERRE · sichtbar wenn data-gate="gesperrt" ─ */
-  #sperre{display:none}
-  html[data-gate="gesperrt"] #kopf,
-  html[data-gate="gesperrt"] #tueren,
-  html[data-gate="gesperrt"] #setzung,
-  html[data-gate="gesperrt"] #status,
-  html[data-gate="gesperrt"] #fuss,
-  html[data-gate="gesperrt"] #cv,
-  html[data-gate="gesperrt"] .ecke{display:none !important}
-
-  html[data-gate="gesperrt"] #sperre{
-    display:flex;position:fixed;inset:0;
-    align-items:center;justify-content:center;flex-direction:column;
-    background:#05070e;z-index:9999;text-align:center;padding:24px;
-  }
-  #sperre .marke{font-size:9px;letter-spacing:.55em;color:#3a5a4a;margin-bottom:16px}
-  #sperre .wort{
-    font-size:clamp(22px,5vw,44px);font-weight:100;
-    letter-spacing:.45em;color:#8cf0d0;
-    text-shadow:0 0 30px rgba(140,240,208,.25);
-    margin-bottom:16px;
-  }
-  #sperre .grund{
-    font-size:10px;letter-spacing:.35em;color:#b388ff;
-    line-height:2.4;max-width:min(92vw,520px);
-  }
-  #sperre .satz{
-    font-size:9px;letter-spacing:.35em;color:#3a5a4a;
-    margin-top:20px;line-height:2.2;
-  }
-
-  @media(max-width:640px){
-    #tueren{gap:10px;padding:20px 22px}
-    #tueren a{font-size:9.5px;letter-spacing:.3em;padding:5px 12px}
-    #setzung{bottom:24px}
-    #setzung .zeile{font-size:8.5px;letter-spacing:.25em}
-    #fuss{font-size:7.5px;bottom:8px}
-  }
-</style>
-</head>
-<body>
-
 <canvas id="cv"></canvas>
 
 <div id="kopf">
   <div class="marke">iki1uc · kader</div>
-  <h1>evoMIND</h1>
-  <div class="unter">
-    <b>dimension.flow()</b><br>
-    engine · tool · flow
-  </div>
+  <h1>ATOM</h1>
+  <div class="unter">natur · wasser · co₂ · sauerstoff</div>
 </div>
 
-<div id="tueren">
-  <a href="ID.html"><span class="mark"></span>id · identität</a>
-  <a href="readme.html" class="gold"><span class="mark"></span>readme · wegbeschreibung</a>
-  <a href="anker.html" class="purpur"><span class="mark"></span>anker · der erste code</a>
-  <a href="block.html" class="gold"><span class="mark"></span>block · frieden</a>
-  <a href="geo.rad" class="purpur"><span class="mark"></span>geo · geometrie</a>
-  <a href="schub.md" class="gold"><span class="mark"></span>schub · die sechs</a>
+<div id="werte">
+  <div class="z"><span class="k">O₂</span><span class="b"><i id="bO2"></i></span><span class="v" id="vO2">—</span></div>
+  <div class="z"><span class="k">CO₂</span><span class="b"><i id="bCO2"></i></span><span class="v" id="vCO2">—</span></div>
+  <div class="z"><span class="k">H₂O</span><span class="b"><i id="bH2O"></i></span><span class="v" id="vH2O">—</span></div>
+  <div class="z"><span class="k">KERN</span><span class="b"><i id="bKern"></i></span><span class="v" id="vKern">—</span></div>
 </div>
 
-<div id="status">
-  <div>wache · <span class="v" id="wache">aktiv</span></div>
-  <div>protokoll · <span class="v" id="proto">—</span></div>
-  <div>blockiert · <span class="warn" id="blk">0</span></div>
-  <div>laufzeit · <span class="v" id="lauf">0s</span></div>
+<div id="frieden" class="aus">· frieden ·</div>
+
+<div id="satz">
+  o₂ und co₂ sind gegenpole<br>
+  atem bewegt sie · frieden ist das band
 </div>
 
-<div id="setzung">
-  <div class="zeile">sechs dateien · ein zentrum</div>
-  <div class="zeile gold"><b>aggregator · continuum · healt · quant · sli · stage</b></div>
-  <div class="trenn"></div>
-  <div class="zeile purpur"><b>implosion ist sammlung nach innen</b></div>
-  <div class="zeile">kein verlust · frieden</div>
-</div>
+<div id="fuss"><b>iki1uc</b> · atom · <span id="zeit">--:--</span></div>
 
-<div id="fuss">
-  <b>iki1uc</b> · evoMIND · <span id="zeit">--:--</span>
-</div>
-
-<!-- SPERRBILDSCHIRM · nur sichtbar wenn gesperrt -->
 <div id="sperre">
-  <div class="marke">iki1uc · kader</div>
   <div class="wort">GESPERRT</div>
   <div class="grund" id="sperre-grund">wächter nicht geladen</div>
-  <div class="satz">
-    diese seite läuft nur mit security.js<br>
-    oder gar nicht
-  </div>
 </div>
 
 <div class="ecke ol"></div>
@@ -235,213 +128,153 @@
 <div class="ecke ul"></div>
 <div class="ecke ur"></div>
 
-<script>
-/* ═══════════════════════════════════════════════════════════
-   index.html · evoMIND · atomar sicher
-   ═══════════════════════════════════════════════════════════
-   Laufzeit-Sperre:
-     - gate.ok MUSS true sein, sonst läuft nichts
-     - die animation prüft bei jedem frame
-     - der watchdog prüft alle 3 sekunden erneut
-     - wenn der wächter verschwindet: sperrbildschirm
-   ═══════════════════════════════════════════════════════════ */
+<script type="module">
+import { ATOM } from './atom.js';
 
-(function(){
-  'use strict';
+if(!window.__EVO_GATE || !window.__EVO_GATE.ok){
+  console.log('atom · gesperrt');
+  throw new Error('gate');
+}
 
-  /* ─── NICHT LAUFEN, WENN GESPERRT ──────────────── */
-  if(!window.__EVO_GATE || !window.__EVO_GATE.ok){
-    console.log('');
-    console.log('  evoMIND · index · GESPERRT');
-    console.log('  grund · ' + (window.__EVO_GATE?.grund || 'unbekannt'));
-    console.log('  kein lauf ohne wächter.');
-    console.log('');
-    return;
-  }
+function setZeit(){
+  const j = new Date();
+  document.getElementById('zeit').textContent =
+    String(j.getHours()).padStart(2,'0') + ':' +
+    String(j.getMinutes()).padStart(2,'0');
+}
+setZeit();
+setInterval(setZeit, 30000);
 
-  const startZeit = Date.now();
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+let cx, cy;
 
-  /* ─── ZEIT ──────────────────────────────────────── */
-  function setzeZeit(){
-    const j = new Date();
-    const hh = String(j.getHours()).padStart(2,'0');
-    const mm = String(j.getMinutes()).padStart(2,'0');
-    document.getElementById('zeit').textContent = hh + ':' + mm;
-  }
-  setzeZeit();
-  setInterval(setzeZeit, 30000);
+function resize(){
+  const dpr = Math.min(devicePixelRatio, 2);
+  cv.width = innerWidth * dpr;
+  cv.height = innerHeight * dpr;
+  cv.style.width = innerWidth + 'px';
+  cv.style.height = innerHeight + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  cx = innerWidth / 2;
+  cy = innerHeight / 2;
+}
+addEventListener('resize', resize);
+resize();
 
-  /* ─── LAUFZEIT-ANZEIGE ──────────────────────────── */
-  const laufEl = document.getElementById('lauf');
-  setInterval(() => {
-    const sek = Math.floor((Date.now() - startZeit) / 1000);
-    laufEl.textContent = sek + 's';
-  }, 1000);
+const FARBEN = {
+  o2:   '#7ce0a8',
+  co2:  '#ffcc44',
+  h2o:  '#5fc8ff',
+  kern: '#b388ff',
+};
 
-  /* ─── WÄCHTER-BERICHT LESEN ─────────────────────── */
-  setTimeout(() => {
-    const b = window.__EVO_BERICHT;
-    if(!b) return;
-    document.getElementById('proto').textContent = b.protokoll.replace(':','');
-    document.getElementById('blk').textContent = b.blockiert.length;
-    if(b.fehler.length){
-      document.getElementById('wache').textContent = 'fehler';
-      document.getElementById('wache').style.color = '#b388ff';
-    }
-  }, 400);
+let t = 0;
+function zeichne(){
+  if(!window.__EVO_GATE.ok) return;
+  requestAnimationFrame(zeichne);
+  t += 16;
 
-  /* ─── CANVAS ─────────────────────────────────────── */
-  const cv = document.getElementById('cv');
-  const ctx = cv.getContext('2d');
-  let cx, cy;
+  const z = ATOM.atme(t);
 
-  function resize(){
-    const dpr = Math.min(devicePixelRatio, 2);
-    cv.width  = innerWidth * dpr;
-    cv.height = innerHeight * dpr;
-    cv.style.width  = innerWidth + 'px';
-    cv.style.height = innerHeight + 'px';
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    cx = innerWidth / 2;
-    cy = innerHeight / 2;
-  }
-  addEventListener('resize', resize);
-  resize();
+  ctx.fillStyle = 'rgba(4,7,12,0.22)';
+  ctx.fillRect(0, 0, innerWidth, innerHeight);
 
-  const STATIONEN = [
-    { a: 0,               farbe:'#8cf0d0' },
-    { a: Math.PI / 3,     farbe:'#f0d080' },
-    { a: 2 * Math.PI / 3, farbe:'#7ee0a0' },
-    { a: Math.PI,         farbe:'#b388ff' },
-    { a: 4 * Math.PI / 3, farbe:'#a0c8b8' },
-    { a: 5 * Math.PI / 3, farbe:'#8aa8a0' },
+  const Rmax = Math.min(innerWidth, innerHeight) * 0.32;
+  const Rinner = Rmax * (1 - ATOM.band / ATOM.mitte);
+
+  ctx.beginPath();
+  ctx.arc(cx, cy, Rmax, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(140,240,208,0.06)';
+  ctx.lineWidth = 0.6;
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.arc(cx, cy, Rinner, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(140,240,208,0.06)';
+  ctx.lineWidth = 0.6;
+  ctx.stroke();
+
+  const ringe = [
+    { k:'o2',   wert:z.o2,   farbe:FARBEN.o2   },
+    { k:'co2',  wert:z.co2,  farbe:FARBEN.co2  },
+    { k:'h2o',  wert:z.h2o,  farbe:FARBEN.h2o  },
+    { k:'kern', wert:z.kern, farbe:FARBEN.kern },
   ];
 
-  let t = 0;
-
-  function zeichne(){
-    /* ─── LAUFZEIT-PRÜFUNG · bei jedem frame ───────
-       Wenn der wächter weg ist: keine weitere zeichnung.
-       Kein halbgesperrter zustand. */
-    if(!window.__EVO_GATE || !window.__EVO_GATE.ok){
-      return;
-    }
-    requestAnimationFrame(zeichne);
-    t += 0.006;
-
-    ctx.fillStyle = 'rgba(5,7,14,0.2)';
-    ctx.fillRect(0, 0, innerWidth, innerHeight);
-
-    const atem = 0.5 + 0.5 * Math.sin(t * 0.6);
-    const k = 0.5 + atem * 0.4;
-    const R = Math.min(innerWidth, innerHeight) * 0.28 * (1 - k * 0.15);
-
-    STATIONEN.forEach((s) => {
-      const a = s.a + t * 0.15;
-      const x = cx + Math.cos(a) * R;
-      const y = cy + Math.sin(a) * R;
-
-      ctx.beginPath();
-      ctx.arc(x, y, 8 + k * 4, 0, Math.PI * 2);
-      ctx.strokeStyle = s.farbe;
-      ctx.globalAlpha = 0.15 + k * 0.2;
-      ctx.lineWidth = 0.8;
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.arc(x, y, 2.5 + k * 1.5, 0, Math.PI * 2);
-      ctx.fillStyle = s.farbe;
-      ctx.globalAlpha = 0.5 + k * 0.5;
-      ctx.fill();
-
-      ctx.beginPath();
-      ctx.moveTo(x, y);
-      ctx.lineTo(cx, cy);
-      ctx.strokeStyle = s.farbe;
-      ctx.globalAlpha = 0.06 + k * 0.1;
-      ctx.lineWidth = 0.5;
-      ctx.stroke();
-      ctx.globalAlpha = 1;
-    });
-
-    const kernGroesse = 24 * (1 - k * 0.25);
-    [90, 60, 34].forEach((r0, i) => {
-      const r = r0 * (1 - k * 0.15);
-      ctx.beginPath();
-      ctx.arc(cx, cy, r, 0, Math.PI * 2);
-      ctx.strokeStyle = ['rgba(140,240,208,.12)',
-                         'rgba(240,208,128,.14)',
-                         'rgba(179,136,255,.16)'][i];
-      ctx.lineWidth = 0.7;
-      ctx.stroke();
-    });
-
-    const glut = ctx.createRadialGradient(cx, cy, 0, cx, cy, kernGroesse * 2.5);
-    glut.addColorStop(0, `rgba(140,240,208,${0.4 + k * 0.4})`);
-    glut.addColorStop(0.5, `rgba(240,208,128,${0.1 + k * 0.15})`);
-    glut.addColorStop(1, 'rgba(140,240,208,0)');
-    ctx.beginPath();
-    ctx.arc(cx, cy, kernGroesse * 2.5, 0, Math.PI * 2);
-    ctx.fillStyle = glut;
-    ctx.fill();
+  ringe.forEach((r, i) => {
+    const a0 = (i / 4) * Math.PI * 2 - Math.PI / 2;
+    const a1 = a0 + (Math.PI * 2) / 4 * r.wert;
 
     ctx.beginPath();
-    ctx.arc(cx, cy, 1.5 + k * 1.5, 0, Math.PI * 2);
-    ctx.fillStyle = '#8cf0d0';
+    ctx.arc(cx, cy, Rmax, a0, a1);
+    ctx.strokeStyle = r.farbe;
+    ctx.globalAlpha = 0.35 + r.wert * 0.5;
+    ctx.lineWidth = 1.6;
+    ctx.stroke();
+
+    const ex = cx + Math.cos(a1) * Rmax;
+    const ey = cy + Math.sin(a1) * Rmax;
+    ctx.beginPath();
+    ctx.arc(ex, ey, 2.5 + r.wert * 2, 0, Math.PI * 2);
+    ctx.fillStyle = r.farbe;
+    ctx.globalAlpha = 0.7 + r.wert * 0.3;
     ctx.fill();
+    ctx.globalAlpha = 1;
+  });
 
-    for(let i = 0; i < 6; i++){
-      const ph = (t * 0.5 + i / 6) % 1;
-      const r = R * (1 - ph);
-      if(r < 8) continue;
-      ctx.beginPath();
-      ctx.arc(cx, cy, r, 0, Math.PI * 2);
-      ctx.strokeStyle = `rgba(140,240,208,${0.1 * (1 - ph)})`;
-      ctx.lineWidth = 0.5;
-      ctx.stroke();
-    }
+  const kernGlut = ctx.createRadialGradient(cx, cy, 0, cx, cy, 70);
+  const hauch = z.frieden ? 0.5 : 0.2;
+  kernGlut.addColorStop(0, `rgba(140,240,208,${hauch})`);
+  kernGlut.addColorStop(0.5, `rgba(179,136,255,${hauch * 0.5})`);
+  kernGlut.addColorStop(1, 'rgba(140,240,208,0)');
+  ctx.beginPath();
+  ctx.arc(cx, cy, 70, 0, Math.PI * 2);
+  ctx.fillStyle = kernGlut;
+  ctx.fill();
 
-    ctx.save();
-    ctx.translate(cx, cy);
-    ctx.rotate(t * 0.04);
-    for(let i = 0; i < 3; i++){
-      ctx.beginPath();
-      ctx.ellipse(0, 0, R * 1.55, R * 1.55 * 0.35, i * Math.PI / 3, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(120,220,150,0.045)';
-      ctx.lineWidth = 0.8;
-      ctx.stroke();
-    }
-    ctx.restore();
+  ctx.beginPath();
+  ctx.arc(cx, cy, 3 + z.kern * 3, 0, Math.PI * 2);
+  ctx.fillStyle = '#8cf0d0';
+  ctx.fill();
+
+  for(let i = 0; i < 4; i++){
+    const ph = ((t * 0.00015) + i / 4) % 1;
+    const r = Rmax * (1 - ph);
+    if(r < 10) continue;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(140,240,208,${0.06 * (1 - ph)})`;
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
   }
-  zeichne();
 
-  /* ─── WÄCHTER-WATCHDOG · alle 3 sekunden ────────
-     Wenn der wächter in laufzeit verschwindet,
-     sperren wir sofort. */
-  setInterval(() => {
-    const wacheDa   = window.__EVO_WACHE === true;
-    const berichtDa = window.__EVO_BERICHT && typeof window.__EVO_BERICHT === 'object';
+  const setz = (id, x) => {
+    const v = document.getElementById('v' + id);
+    const b = document.getElementById('b' + id);
+    if(v) v.textContent = (x * 100).toFixed(0) + '%';
+    if(b) b.style.width  = (x * 100).toFixed(0) + '%';
+  };
+  setz('O2',   z.o2);
+  setz('CO2',  z.co2);
+  setz('H2O',  z.h2o);
+  setz('Kern', z.kern);
 
-    if(!wacheDa || !berichtDa){
-      window.__EVO_GATE.ok = false;
-      window.__EVO_GATE.grund = 'wächter in laufzeit verschwunden';
-      document.documentElement.setAttribute('data-gate','gesperrt');
-      const g = document.getElementById('sperre-grund');
-      if(g) g.textContent = window.__EVO_GATE.grund;
-    }
-  }, 3000);
-
-  /* ─── KONSOLE ───────────────────────────────────── */
-  console.log('');
-  console.log('  evoMIND · index · iki1uc');
-  console.log('  ─────────────────────────────────');
-  console.log('  wächter · ' + (window.__EVO_WACHE ? 'geladen' : 'FEHLT'));
-  console.log('  laufzeit-sperre · aktiv');
-  console.log('  watchdog · alle 3 sekunden');
-  console.log('  atomar · implosion · kein verlust');
-  console.log('');
-
-})();
+  const fEl = document.getElementById('frieden');
+  if(z.frieden){
+    fEl.classList.add('an'); fEl.classList.remove('aus');
+    fEl.textContent = '· frieden ·';
+  } else {
+    fEl.classList.add('aus'); fEl.classList.remove('an');
+    const w = z.waage;
+    const max = Math.max(w.o2, w.co2, w.h2o, w.kern);
+    const wer = max === w.o2 ? 'o₂' :
+                max === w.co2 ? 'co₂' :
+                max === w.h2o ? 'h₂o' : 'kern';
+    fEl.textContent = `· ${wer} außer band ·`;
+  }
+}
+zeichne();
 </script>
 
 </body>
