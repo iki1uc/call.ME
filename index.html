@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
-<!-- ═══ KOPF-SPERRE · atomar ══════════════════════════ -->
+<!-- KOPF-SPERRE · atomar -->
 <meta http-equiv="Content-Security-Policy" content="
   default-src 'self';
   script-src 'self' 'unsafe-inline';
@@ -25,6 +25,36 @@
   payment=(), usb=(), magnetometer=(), gyroscope=()
 ">
 
+<!-- 1 · TORWÄCHTER · läuft als allererstes -->
+<script>
+  window.__EVO_GATE = {
+    ok: false,
+    grund: 'wächter noch nicht geprüft',
+    zeit: Date.now(),
+  };
+</script>
+
+<!-- 2 · DER WÄCHTER -->
+<script src="security.js"></script>
+
+<!-- 3 · TÜRSTEHER · prüft sofort -->
+<script>
+  (function(){
+    if(window.__EVO_WACHE === true){
+      window.__EVO_GATE.ok = true;
+      window.__EVO_GATE.grund = 'wächter aktiv';
+    } else {
+      window.__EVO_GATE.ok = false;
+      window.__EVO_GATE.grund = 'security.js fehlt oder fehlgeschlagen';
+      document.documentElement.setAttribute('data-gate','gesperrt');
+      document.addEventListener('DOMContentLoaded', () => {
+        const g = document.getElementById('sperre-grund');
+        if(g) g.textContent = window.__EVO_GATE.grund;
+      });
+    }
+  })();
+</script>
+
 <title>evoMIND · index · iki1uc</title>
 
 <style>
@@ -39,103 +69,105 @@
     position:fixed;top:44px;left:50%;transform:translateX(-50%);
     text-align:center;z-index:6;pointer-events:none;
   }
-  #kopf .marke{
-    font-size:9px;letter-spacing:.55em;color:#2a4a3a;
-    margin-bottom:10px;
-  }
+  #kopf .marke{font-size:9px;letter-spacing:.55em;color:#2a4a3a;margin-bottom:10px}
   #kopf h1{
-    font-size:clamp(20px,4vw,38px);
-    font-weight:100;letter-spacing:.4em;
+    font-size:clamp(20px,4vw,38px);font-weight:100;letter-spacing:.4em;
     background:linear-gradient(135deg,#8cf0d0,#f0d080 55%,#b388ff);
     -webkit-background-clip:text;-webkit-text-fill-color:transparent;
     margin-bottom:10px;
   }
-  #kopf .unter{
-    font-size:10px;letter-spacing:.4em;color:#3a5a4a;
-    line-height:2.2;
-  }
+  #kopf .unter{font-size:10px;letter-spacing:.4em;color:#3a5a4a;line-height:2.2}
   #kopf .unter b{color:#8cf0d0;font-weight:400}
 
-  /* ─── DIE TÜREN ─────────────────────────────────── */
+  /* ─── TÜREN ─────────────────────────────────────── */
   #tueren{
-    position:fixed;top:50%;left:50%;
-    transform:translate(-50%,-50%);
-    display:flex;flex-direction:column;
-    gap:14px;z-index:7;
-    align-items:center;
-    padding:28px 32px;
-    background:rgba(5,7,14,.65);
-    backdrop-filter:blur(6px);
-    border:1px solid rgba(120,220,150,.06);
-    border-radius:4px;
+    position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+    display:flex;flex-direction:column;gap:14px;z-index:7;
+    align-items:center;padding:28px 32px;
+    background:rgba(5,7,14,.65);backdrop-filter:blur(6px);
+    border:1px solid rgba(120,220,150,.06);border-radius:4px;
   }
   #tueren a{
     color:#8aa8a0;text-decoration:none;
-    font-size:11px;letter-spacing:.4em;
-    padding:6px 20px;
-    border-bottom:1px solid transparent;
-    transition:all .35s;
-    white-space:nowrap;
-    display:flex;align-items:center;gap:12px;
+    font-size:11px;letter-spacing:.4em;padding:6px 20px;
+    border-bottom:1px solid transparent;transition:all .35s;
+    white-space:nowrap;display:flex;align-items:center;gap:12px;
   }
   #tueren a .mark{
     width:6px;height:6px;border-radius:50%;
-    background:currentColor;opacity:.4;
-    transition:opacity .35s;
+    background:currentColor;opacity:.4;transition:opacity .35s;
   }
-  #tueren a:hover{
-    color:#8cf0d0;
-    border-bottom-color:rgba(140,240,208,.4);
-  }
+  #tueren a:hover{color:#8cf0d0;border-bottom-color:rgba(140,240,208,.4)}
   #tueren a:hover .mark{opacity:1}
   #tueren a.gold:hover{color:#f0d080;border-bottom-color:rgba(240,208,128,.4)}
   #tueren a.purpur:hover{color:#b388ff;border-bottom-color:rgba(179,136,255,.4)}
 
-  /* ─── SETZUNG · UNTEN ───────────────────────────── */
+  /* ─── SETZUNG ───────────────────────────────────── */
   #setzung{
     position:fixed;bottom:40px;left:50%;transform:translateX(-50%);
     text-align:center;z-index:6;pointer-events:none;
-    max-width:min(92vw,760px);
-    line-height:2.2;
+    max-width:min(92vw,760px);line-height:2.2;
   }
-  #setzung .zeile{
-    font-size:10px;letter-spacing:.35em;color:#3a5a4a;
-  }
+  #setzung .zeile{font-size:10px;letter-spacing:.35em;color:#3a5a4a}
   #setzung .zeile b{color:#8cf0d0;font-weight:400}
   #setzung .zeile.gold b{color:#f0d080}
   #setzung .zeile.purpur b{color:#b388ff}
-  #setzung .trenn{
-    width:40px;height:1px;background:rgba(120,220,150,.15);
-    margin:12px auto;
-  }
+  #setzung .trenn{width:40px;height:1px;background:rgba(120,220,150,.15);margin:12px auto}
 
-  /* ─── STATUS · RECHTS OBEN ──────────────────────── */
+  /* ─── STATUS ────────────────────────────────────── */
   #status{
     position:fixed;top:22px;right:22px;z-index:6;pointer-events:none;
     font-size:8.5px;letter-spacing:.3em;color:#2a4a3a;
     text-align:right;line-height:2;
   }
   #status .v{color:#8cf0d0}
-  #status .g{color:#f0d080}
-  #status .r{color:#b388ff}
   #status .warn{color:#f0d080}
 
   /* ─── FUSS ──────────────────────────────────────── */
   #fuss{
     position:fixed;bottom:14px;right:20px;
-    font-size:9px;letter-spacing:.35em;color:#1e3328;
-    z-index:6;
+    font-size:9px;letter-spacing:.35em;color:#1e3328;z-index:6;
   }
   #fuss b{color:#3a5a4a;font-weight:400}
 
   /* ─── ZEICHEN ───────────────────────────────────── */
   .ecke{position:fixed;width:14px;height:14px;
-        z-index:998;pointer-events:none;opacity:.28;
-        border-color:#8cf0d0}
+        z-index:998;pointer-events:none;opacity:.28;border-color:#8cf0d0}
   .ecke.ol{top:12px;left:12px;border-top:1px solid;border-left:1px solid}
   .ecke.or{top:12px;right:12px;border-top:1px solid;border-right:1px solid}
   .ecke.ul{bottom:12px;left:12px;border-bottom:1px solid;border-left:1px solid}
   .ecke.ur{bottom:12px;right:12px;border-bottom:1px solid;border-right:1px solid}
+
+  /* ─── SPERRE · sichtbar wenn data-gate="gesperrt" ─ */
+  #sperre{display:none}
+  html[data-gate="gesperrt"] #kopf,
+  html[data-gate="gesperrt"] #tueren,
+  html[data-gate="gesperrt"] #setzung,
+  html[data-gate="gesperrt"] #status,
+  html[data-gate="gesperrt"] #fuss,
+  html[data-gate="gesperrt"] #cv,
+  html[data-gate="gesperrt"] .ecke{display:none !important}
+
+  html[data-gate="gesperrt"] #sperre{
+    display:flex;position:fixed;inset:0;
+    align-items:center;justify-content:center;flex-direction:column;
+    background:#05070e;z-index:9999;text-align:center;padding:24px;
+  }
+  #sperre .marke{font-size:9px;letter-spacing:.55em;color:#3a5a4a;margin-bottom:16px}
+  #sperre .wort{
+    font-size:clamp(22px,5vw,44px);font-weight:100;
+    letter-spacing:.45em;color:#8cf0d0;
+    text-shadow:0 0 30px rgba(140,240,208,.25);
+    margin-bottom:16px;
+  }
+  #sperre .grund{
+    font-size:10px;letter-spacing:.35em;color:#b388ff;
+    line-height:2.4;max-width:min(92vw,520px);
+  }
+  #sperre .satz{
+    font-size:9px;letter-spacing:.35em;color:#3a5a4a;
+    margin-top:20px;line-height:2.2;
+  }
 
   @media(max-width:640px){
     #tueren{gap:10px;padding:20px 22px}
@@ -147,9 +179,6 @@
 </style>
 </head>
 <body>
-
-<!-- ═══ WÄCHTER · ZUERST · VOR ALLEM ═══════════════════ -->
-<script src="security.js"></script>
 
 <canvas id="cv"></canvas>
 
@@ -175,6 +204,7 @@
   <div>wache · <span class="v" id="wache">aktiv</span></div>
   <div>protokoll · <span class="v" id="proto">—</span></div>
   <div>blockiert · <span class="warn" id="blk">0</span></div>
+  <div>laufzeit · <span class="v" id="lauf">0s</span></div>
 </div>
 
 <div id="setzung">
@@ -189,6 +219,17 @@
   <b>iki1uc</b> · evoMIND · <span id="zeit">--:--</span>
 </div>
 
+<!-- SPERRBILDSCHIRM · nur sichtbar wenn gesperrt -->
+<div id="sperre">
+  <div class="marke">iki1uc · kader</div>
+  <div class="wort">GESPERRT</div>
+  <div class="grund" id="sperre-grund">wächter nicht geladen</div>
+  <div class="satz">
+    diese seite läuft nur mit security.js<br>
+    oder gar nicht
+  </div>
+</div>
+
 <div class="ecke ol"></div>
 <div class="ecke or"></div>
 <div class="ecke ul"></div>
@@ -198,15 +239,27 @@
 /* ═══════════════════════════════════════════════════════════
    index.html · evoMIND · atomar sicher
    ═══════════════════════════════════════════════════════════
-   Der eingang. Er zeigt:
-     - sechs ringe (die sechs stationen)
-     - ein zentrum (implosion)
-     - die türen zu allen anderen dateien
-     - den bericht des wächters
+   Laufzeit-Sperre:
+     - gate.ok MUSS true sein, sonst läuft nichts
+     - die animation prüft bei jedem frame
+     - der watchdog prüft alle 3 sekunden erneut
+     - wenn der wächter verschwindet: sperrbildschirm
    ═══════════════════════════════════════════════════════════ */
 
 (function(){
   'use strict';
+
+  /* ─── NICHT LAUFEN, WENN GESPERRT ──────────────── */
+  if(!window.__EVO_GATE || !window.__EVO_GATE.ok){
+    console.log('');
+    console.log('  evoMIND · index · GESPERRT');
+    console.log('  grund · ' + (window.__EVO_GATE?.grund || 'unbekannt'));
+    console.log('  kein lauf ohne wächter.');
+    console.log('');
+    return;
+  }
+
+  const startZeit = Date.now();
 
   /* ─── ZEIT ──────────────────────────────────────── */
   function setzeZeit(){
@@ -218,18 +271,17 @@
   setzeZeit();
   setInterval(setzeZeit, 30000);
 
-  /* ─── WÄCHTER-BERICHT LESEN ───────────────────────
-     security.js muss VOR diesem skript gelaufen sein.
-     Wenn es lief, steht window.__EVO_BERICHT bereit.
-  ─────────────────────────────────────────────────── */
+  /* ─── LAUFZEIT-ANZEIGE ──────────────────────────── */
+  const laufEl = document.getElementById('lauf');
+  setInterval(() => {
+    const sek = Math.floor((Date.now() - startZeit) / 1000);
+    laufEl.textContent = sek + 's';
+  }, 1000);
+
+  /* ─── WÄCHTER-BERICHT LESEN ─────────────────────── */
   setTimeout(() => {
     const b = window.__EVO_BERICHT;
-    if(!b){
-      document.getElementById('wache').textContent = 'kein bericht';
-      document.getElementById('wache').style.color = '#f0d080';
-      document.getElementById('proto').textContent = 'ohne wächter';
-      return;
-    }
+    if(!b) return;
     document.getElementById('proto').textContent = b.protokoll.replace(':','');
     document.getElementById('blk').textContent = b.blockiert.length;
     if(b.fehler.length){
@@ -238,7 +290,7 @@
     }
   }, 400);
 
-  /* ─── CANVAS · DIE SECHS RINGE ──────────────────── */
+  /* ─── CANVAS ─────────────────────────────────────── */
   const cv = document.getElementById('cv');
   const ctx = cv.getContext('2d');
   let cx, cy;
@@ -256,40 +308,39 @@
   addEventListener('resize', resize);
   resize();
 
-  /* Die sechs stationen */
   const STATIONEN = [
-    { a: 0,               farbe:'#8cf0d0', name:'aggregator' },
-    { a: Math.PI / 3,     farbe:'#f0d080', name:'continuum'  },
-    { a: 2 * Math.PI / 3, farbe:'#7ee0a0', name:'healt'      },
-    { a: Math.PI,         farbe:'#b388ff', name:'quant'      },
-    { a: 4 * Math.PI / 3, farbe:'#a0c8b8', name:'sli'        },
-    { a: 5 * Math.PI / 3, farbe:'#8aa8a0', name:'stage'      },
+    { a: 0,               farbe:'#8cf0d0' },
+    { a: Math.PI / 3,     farbe:'#f0d080' },
+    { a: 2 * Math.PI / 3, farbe:'#7ee0a0' },
+    { a: Math.PI,         farbe:'#b388ff' },
+    { a: 4 * Math.PI / 3, farbe:'#a0c8b8' },
+    { a: 5 * Math.PI / 3, farbe:'#8aa8a0' },
   ];
 
   let t = 0;
 
   function zeichne(){
+    /* ─── LAUFZEIT-PRÜFUNG · bei jedem frame ───────
+       Wenn der wächter weg ist: keine weitere zeichnung.
+       Kein halbgesperrter zustand. */
+    if(!window.__EVO_GATE || !window.__EVO_GATE.ok){
+      return;
+    }
     requestAnimationFrame(zeichne);
     t += 0.006;
 
-    // Sanftes Wischen — verhindert Schlierenbildung
     ctx.fillStyle = 'rgba(5,7,14,0.2)';
     ctx.fillRect(0, 0, innerWidth, innerHeight);
 
-    // Implosion atmet
     const atem = 0.5 + 0.5 * Math.sin(t * 0.6);
     const k = 0.5 + atem * 0.4;
-
-    // Radius: schrumpft, wenn Implosion stark
     const R = Math.min(innerWidth, innerHeight) * 0.28 * (1 - k * 0.15);
 
-    /* ─── SECHS RINGE · die stationen ─────────────── */
-    STATIONEN.forEach((s, i) => {
+    STATIONEN.forEach((s) => {
       const a = s.a + t * 0.15;
       const x = cx + Math.cos(a) * R;
       const y = cy + Math.sin(a) * R;
 
-      // Ring um die station
       ctx.beginPath();
       ctx.arc(x, y, 8 + k * 4, 0, Math.PI * 2);
       ctx.strokeStyle = s.farbe;
@@ -297,14 +348,12 @@
       ctx.lineWidth = 0.8;
       ctx.stroke();
 
-      // Punkt
       ctx.beginPath();
       ctx.arc(x, y, 2.5 + k * 1.5, 0, Math.PI * 2);
       ctx.fillStyle = s.farbe;
       ctx.globalAlpha = 0.5 + k * 0.5;
       ctx.fill();
 
-      // Linie zum Zentrum
       ctx.beginPath();
       ctx.moveTo(x, y);
       ctx.lineTo(cx, cy);
@@ -312,14 +361,10 @@
       ctx.globalAlpha = 0.06 + k * 0.1;
       ctx.lineWidth = 0.5;
       ctx.stroke();
-
       ctx.globalAlpha = 1;
     });
 
-    /* ─── ZENTRUM · implosion ────────────────────── */
     const kernGroesse = 24 * (1 - k * 0.25);
-
-    // Drei schrumpfende Ringe
     [90, 60, 34].forEach((r0, i) => {
       const r = r0 * (1 - k * 0.15);
       ctx.beginPath();
@@ -331,7 +376,6 @@
       ctx.stroke();
     });
 
-    // Kern
     const glut = ctx.createRadialGradient(cx, cy, 0, cx, cy, kernGroesse * 2.5);
     glut.addColorStop(0, `rgba(140,240,208,${0.4 + k * 0.4})`);
     glut.addColorStop(0.5, `rgba(240,208,128,${0.1 + k * 0.15})`);
@@ -341,13 +385,11 @@
     ctx.fillStyle = glut;
     ctx.fill();
 
-    // Kernpunkt
     ctx.beginPath();
     ctx.arc(cx, cy, 1.5 + k * 1.5, 0, Math.PI * 2);
     ctx.fillStyle = '#8cf0d0';
     ctx.fill();
 
-    /* ─── INNEN-PULS ─ die sechs laufen nach innen */
     for(let i = 0; i < 6; i++){
       const ph = (t * 0.5 + i / 6) % 1;
       const r = R * (1 - ph);
@@ -359,7 +401,6 @@
       ctx.stroke();
     }
 
-    /* ─── ATOMSPUR · ganz außen · der sichere rand ─ */
     ctx.save();
     ctx.translate(cx, cy);
     ctx.rotate(t * 0.04);
@@ -374,12 +415,29 @@
   }
   zeichne();
 
+  /* ─── WÄCHTER-WATCHDOG · alle 3 sekunden ────────
+     Wenn der wächter in laufzeit verschwindet,
+     sperren wir sofort. */
+  setInterval(() => {
+    const wacheDa   = window.__EVO_WACHE === true;
+    const berichtDa = window.__EVO_BERICHT && typeof window.__EVO_BERICHT === 'object';
+
+    if(!wacheDa || !berichtDa){
+      window.__EVO_GATE.ok = false;
+      window.__EVO_GATE.grund = 'wächter in laufzeit verschwunden';
+      document.documentElement.setAttribute('data-gate','gesperrt');
+      const g = document.getElementById('sperre-grund');
+      if(g) g.textContent = window.__EVO_GATE.grund;
+    }
+  }, 3000);
+
   /* ─── KONSOLE ───────────────────────────────────── */
   console.log('');
   console.log('  evoMIND · index · iki1uc');
   console.log('  ─────────────────────────────────');
   console.log('  wächter · ' + (window.__EVO_WACHE ? 'geladen' : 'FEHLT'));
-  console.log('  türen · id · readme · anker · block · geo · schub');
+  console.log('  laufzeit-sperre · aktiv');
+  console.log('  watchdog · alle 3 sekunden');
   console.log('  atomar · implosion · kein verlust');
   console.log('');
 
