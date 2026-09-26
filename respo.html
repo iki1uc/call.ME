@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="
+  default-src 'self';
+  script-src 'self' 'unsafe-inline';
+  style-src 'self' 'unsafe-inline';
+  frame-ancestors 'self';
+  object-src 'none';
+">
+<title>respo · der träger · iki1uc</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;background:#05070e;color:#8aa8a0;
+            font-family:'Consolas','Courier New',monospace;overflow:hidden}
+  canvas{display:block;position:fixed;inset:0}
+
+  #kopf{
+    position:fixed;top:34px;left:50%;transform:translateX(-50%);
+    text-align:center;z-index:6;pointer-events:none;
+  }
+  #kopf .marke{font-size:9px;letter-spacing:.55em;color:#2a4a3a;margin-bottom:8px}
+  #kopf h1{
+    font-size:clamp(18px,3.2vw,32px);font-weight:100;letter-spacing:.45em;
+    color:#8cf0d0;
+    text-shadow:0 0 40px rgba(140,240,208,.2);
+  }
+  #kopf .unter{font-size:9.5px;letter-spacing:.4em;color:#3a5a4a;margin-top:8px}
+
+  #traeger{
+    position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);
+    display:grid;grid-template-columns:1fr 1fr;gap:14px;
+    z-index:7;pointer-events:none;
+  }
+  .t{
+    padding:14px 18px;min-width:200px;
+    background:rgba(0,0,0,.4);
+    border-left:2px solid currentColor;
+    border-radius:2px;
+    line-height:1.7;
+  }
+  .t .name{font-size:10px;letter-spacing:.35em;font-weight:400}
+  .t .rolle{font-size:8.5px;letter-spacing:.28em;opacity:.6;margin-top:4px}
+  .t .tat{font-size:8.5px;letter-spacing:.25em;opacity:.5;margin-top:6px;
+          line-height:1.6}
+
+  #kette{
+    position:fixed;bottom:60px;left:50%;transform:translateX(-50%);
+    text-align:center;z-index:6;pointer-events:none;
+    font-size:10px;letter-spacing:.35em;color:#3a5a4a;line-height:2.2;
+  }
+  #kette .aktiv{color:#f0d080}
+  #kette .ich{color:#8cf0d0;font-weight:400}
+
+  #fuss{
+    position:fixed;bottom:14px;right:20px;
+    font-size:9px;letter-spacing:.35em;color:#1e3328;z-index:6;
+  }
+  #fuss b{color:#3a5a4a;font-weight:400}
+
+  .ecke{position:fixed;width:14px;height:14px;
+        z-index:998;pointer-events:none;opacity:.28;
+        border-color:#8cf0d0}
+  .ecke.ol{top:12px;left:12px;border-top:1px solid;border-left:1px solid}
+  .ecke.or{top:12px;right:12px;border-top:1px solid;border-right:1px solid}
+  .ecke.ul{bottom:12px;left:12px;border-bottom:1px solid;border-left:1px solid}
+  .ecke.ur{bottom:12px;right:12px;border-bottom:1px solid;border-right:1px solid}
+
+  @media(max-width:640px){
+    #traeger{grid-template-columns:1fr;gap:8px}
+    .t{min-width:160px;padding:10px 12px}
+    .t .name{font-size:9px}
+    .t .tat{font-size:7.5px}
+    #kette{font-size:8px}
+  }
+</style>
+</head>
+<body>
+
+<canvas id="cv"></canvas>
+
+<div id="kopf">
+  <div class="marke">iki1uc · kader</div>
+  <h1>RESPO</h1>
+  <div class="unter">der träger · vier schichten · ein knotenpunkt</div>
+</div>
+
+<div id="traeger">
+  <div class="t" style="color:#8cf0d0">
+    <div class="name">CONNECT</div>
+    <div class="rolle">wege</div>
+    <div class="tat">schichten · bedingungen<br>verhandlung</div>
+  </div>
+  <div class="t" style="color:#f0d080">
+    <div class="name">TROPFEN</div>
+    <div class="rolle">fall</div>
+    <div class="tat">berührung · ereignis<br>der kleinste anfang</div>
+  </div>
+  <div class="t" style="color:#b388ff">
+    <div class="name">EFFECT</div>
+    <div class="rolle">wirkung</div>
+    <div class="tat">pulse · flash · wirbel · blitz<br>implosion</div>
+  </div>
+  <div class="t" style="color:#7ee0a0">
+    <div class="name">IMPLOSION</div>
+    <div class="rolle">sammlung</div>
+    <div class="tat">karenz · schlüssel<br>währung · halbes leben</div>
+  </div>
+</div>
+
+<div id="kette">
+  visitor → online → raw → respo-map → <span class="ich">RESPO</span> → spitze → master → <span class="aktiv">die eine zahl</span>
+</div>
+
+<div id="fuss">
+  <b>iki1uc</b> · respo · <span id="zeit">--:--</span>
+</div>
+
+<div class="ecke ol"></div>
+<div class="ecke or"></div>
+<div class="ecke ul"></div>
+<div class="ecke ur"></div>
+
+<script type="module">
+/* ═══════════════════════════════════════════════════════════
+   respo.html · die vier träger als ansicht
+   ═══════════════════════════════════════════════════════════
+   Zeigt: RESPO hält CONNECT · TROPFEN · EFFECT · IMPLOSION.
+   Und gibt sie weiter an spitze · master · die eine zahl.
+   ═══════════════════════════════════════════════════════════ */
+
+let RESPO = null;
+try {
+  const mod = await import('./respo.js');
+  RESPO = mod.RESPO;
+} catch(e){
+  console.warn('respo.js nicht erreichbar — ansicht läuft ohne daten');
+}
+
+/* ─── ZEIT ──────────────────────────────────────── */
+const zeitEl = document.getElementById('zeit');
+function tick(){
+  const j = new Date();
+  zeitEl.textContent =
+    String(j.getHours()).padStart(2,'0') + ':' +
+    String(j.getMinutes()).padStart(2,'0');
+}
+tick();
+setInterval(tick, 30000);
+
+/* ─── CANVAS · die vier träger kreisen ──────────── */
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+let cx, cy;
+
+function resize(){
+  const dpr = Math.min(devicePixelRatio, 2);
+  cv.width  = innerWidth * dpr;
+  cv.height = innerHeight * dpr;
+  cv.style.width  = innerWidth + 'px';
+  cv.style.height = innerHeight + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  cx = innerWidth / 2;
+  cy = innerHeight / 2;
+}
+addEventListener('resize', resize);
+resize();
+
+const TRAGER_PUNKTE = [
+  { a: 0,               farbe:'#8cf0d0' },   // CONNECT
+  { a: Math.PI / 2,     farbe:'#f0d080' },   // TROPFEN
+  { a: Math.PI,         farbe:'#b388ff' },   // EFFECT
+  { a: 3 * Math.PI / 2, farbe:'#7ee0a0' },   // IMPLOSION
+];
+
+let t = 0;
+function zeichne(){
+  requestAnimationFrame(zeichne);
+  t += 0.007;
+
+  ctx.fillStyle = 'rgba(5,7,14,0.2)';
+  ctx.fillRect(0, 0, innerWidth, innerHeight);
+
+  const atem = 0.5 + 0.5 * Math.sin(t * 0.6);
+  const k = 0.5 + atem * 0.4;
+  const R = Math.min(innerWidth, innerHeight) * 0.24 * (1 - k * 0.12);
+
+  /* Die vier träger */
+  TRAGER_PUNKTE.forEach((s, i) => {
+    const a = s.a + t * 0.2;
+    const x = cx + Math.cos(a) * R;
+    const y = cy + Math.sin(a) * R;
+
+    // Linie zum zentrum
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(cx, cy);
+    ctx.strokeStyle = s.farbe;
+    ctx.globalAlpha = 0.1 + k * 0.15;
+    ctx.lineWidth = 0.6;
+    ctx.stroke();
+
+    // Punkt
+    ctx.beginPath();
+    ctx.arc(x, y, 3 + k * 2, 0, Math.PI * 2);
+    ctx.fillStyle = s.farbe;
+    ctx.globalAlpha = 0.6 + k * 0.4;
+    ctx.fill();
+    ctx.globalAlpha = 1;
+  });
+
+  /* Zentrum — der knotenpunkt */
+  const glut = ctx.createRadialGradient(cx, cy, 0, cx, cy, 60);
+  glut.addColorStop(0, `rgba(140,240,208,${0.4 + k * 0.4})`);
+  glut.addColorStop(0.5, `rgba(240,208,128,${0.1 + k * 0.15})`);
+  glut.addColorStop(1, 'rgba(140,240,208,0)');
+  ctx.beginPath();
+  ctx.arc(cx, cy, 60, 0, Math.PI * 2);
+  ctx.fillStyle = glut;
+  ctx.fill();
+
+  // Kernpunkt
+  ctx.beginPath();
+  ctx.arc(cx, cy, 2 + k * 2, 0, Math.PI * 2);
+  ctx.fillStyle = '#8cf0d0';
+  ctx.fill();
+
+  /* Innenpulse */
+  for(let i = 0; i < 4; i++){
+    const ph = (t * 0.5 + i / 4) % 1;
+    const r = R * (1 - ph);
+    if(r < 8) continue;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(140,240,208,${0.08 * (1 - ph)})`;
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
+  }
+}
+zeichne();
+
+/* ─── KONSOLE ───────────────────────────────────── */
+console.log('');
+console.log('  respo · der träger · iki1uc');
+console.log('  ─────────────────────────────────');
+if(RESPO){
+  console.log('  traeger ·', RESPO.zustand().traeger.join(' · '));
+  console.log('  kette   ·', RESPO.kette().vor.join(' → '),
+              '→ respo →', RESPO.kette().nach.join(' → '));
+  console.log('  satz    ·', RESPO.satz);
+} else {
+  console.log('  respo.js noch nicht erreichbar.');
+  console.log('  ansicht läuft mit platzhaltern.');
+}
+console.log('');
+console.log('  vier träger · ein knotenpunkt');
+console.log('  was durch respo geht · kommt bereit an');
+console.log('');
+</script>
+
+</body>
+</html>
