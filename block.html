@@ -1,0 +1,397 @@
+
+[link](https://example.com)
+
+> zitat
+
+---"></textarea>
+    </div>
+  </div>
+
+  <!-- SPALTE 2 · HTML AUSGEBEN -->
+  <div class="spalte">
+    <div class="kopf">
+      <span><b>html</b> · das ergebnis</span>
+      <span class="marke">wird übersetzt</span>
+    </div>
+    <div class="inhalt">
+      <div id="html"></div>
+    </div>
+  </div>
+
+  <!-- SPALTE 3 · WAS PASSIERT -->
+  <div class="spalte">
+    <div class="kopf">
+      <span><b>lehrer</b> · was passiert</span>
+      <span class="marke">ehrlich</span>
+    </div>
+    <div class="inhalt">
+      <div id="lehrer">
+        <div class="schritt">
+          <span class="nr">·</span>
+          <span class="was">tippe links. rechts wird übersetzt. hier steht, <b>was</b> passiert.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="ecke ol"></div>
+<div class="ecke or"></div>
+<div class="ecke ul"></div>
+<div class="ecke ur"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   readme.html · zeilenübersetzer
+   ═══════════════════════════════════════════════════════════
+   Ein übersetzer von markdown nach html.
+   Kein framework. Kein bundle. Nur regeln.
+
+   Was er tut:
+     1. liest die quelle zeile für zeile
+     2. wendet regeln an (jede regel erkennt ein muster)
+     3. schreibt html
+     4. sagt bei jedem schritt, was er tat
+
+   Das ist keine magie.
+   Das ist: sehen · erkennen · umwandeln · zeigen.
+   ═══════════════════════════════════════════════════════════ */
+
+(function(){
+  'use strict';
+
+  const mdEl     = document.getElementById('md');
+  const htmlEl   = document.getElementById('html');
+  const lehrerEl = document.getElementById('lehrer');
+
+  /* ─── DIE REGELN ────────────────────────────────────
+     Jede regel hat:
+       name  → was sie tut (für den lehrer)
+       test  → wie man ein muster erkennt
+       mach  → was daraus wird
+  ────────────────────────────────────────────────── */
+  const REGELN = [
+
+    { name:'überschrift h1',
+      test: /^# (.+)$/,
+      mach: (m) => ({ html:`<h1>${esc(m[1])}</h1>`, info:'# am anfang → h1' }) },
+
+    { name:'überschrift h2',
+      test: /^## (.+)$/,
+      mach: (m) => ({ html:`<h2>${esc(m[1])}</h2>`, info:'## → h2' }) },
+
+    { name:'überschrift h3',
+      test: /^### (.+)$/,
+      mach: (m) => ({ html:`<h3>${esc(m[1])}</h3>`, info:'### → h3' }) },
+
+    { name:'trennlinie',
+      test: /^(---+|\*\*\*+|___+)$/,
+      mach: () => ({ html:'<hr>', info:'--- → trennlinie' }) },
+
+    { name:'zitat',
+      test: /^> ?(.*)$/,
+      mach: (m) => ({ html:`<blockquote>${inline(m[1])}</blockquote>`, info:'> → zitat' }) },
+
+    { name:'liste punkt',
+      test: /^[-*] (.+)$/,
+      mach: (m, block) => ({ sammle:'ul', html:`<li>${inline(m[1])}</li>`,
+                            info:'- → listenpunkt' }) },
+
+    { name:'liste zahl',
+      test: /^\d+\. (.+)$/,
+      mach: (m, block) => ({ sammle:'ol', html:`<li>${inline(m[1])}</li>`,
+                            info:'1. → nummerierter punkt' }) },
+
+    { name:'leerzeile',
+      test: /^\s*$/,
+      mach: () => ({ html:'', info:'' }) },
+  ];
+
+  /* ─── INLINE-REGELN ─────────────────────────────────
+     Regeln die innerhalb einer zeile wirken.
+     **fett** *kursiv* `code` [link](url)
+  ────────────────────────────────────────────────── */
+  function inline(text){
+    if(!text) return '';
+    let s = text;
+    // link [text](url)
+    s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g,
+      '<a href="$2" target="_blank" rel="noopener">$1</a>');
+    // code `...`
+    s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
+    // fett **...**
+    s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    // kursiv *...*
+    s = s.replace(/(^|[^*])\*([^*]+)\*/g, '$1<em>$2</em>');
+    return s;
+  }
+
+  function esc(s){
+    return s
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;');
+  }
+
+  /* ─── CODE-BLOCK-ERKENNUNG ──────────────────────────
+     Wenn ``` kommt: alles bis zum nächsten ``` wird
+     als code-block behandelt, nicht als text.
+  ────────────────────────────────────────────────── */
+  function uebersetze(quelle){
+    const zeilen = quelle.split('\n');
+    const teile = [];         // ausgabe-stücke
+    const schritte = [];      // protokoll
+    let imCode = false;
+    let codePuffer = [];
+    let listeOffen = null;    // 'ul' oder 'ol' oder null
+    let zaehler = 0;
+
+    function listeSchliessen(){
+      if(listeOffen){
+        teile.push(`</${listeOffen}>`);
+        listeOffen = null;
+      }
+    }
+
+    for(let i = 0; i < zeilen.length; i++){
+      const zeile = zeilen[i];
+      zaehler++;
+
+      // ─── CODE-BLOCK ──────────────────────────────
+      if(/^```/.test(zeile)){
+        if(!imCode){
+          listeSchliessen();
+          imCode = true;
+          codePuffer = [];
+          schritte.push({
+            nr: i+1,
+            was: '``` erkannt',
+            tat: 'code-block beginnt',
+          });
+        } else {
+          imCode = false;
+          const block = codePuffer.join('\n');
+          teile.push(`<pre><code>${esc(block)}</code></pre>`);
+          schritte.push({
+            nr: i+1,
+            was: '``` erkannt',
+            tat: 'code-block endet · ' + codePuffer.length + ' zeilen',
+          });
+        }
+        continue;
+      }
+
+      if(imCode){
+        codePuffer.push(zeile);
+        continue;
+      }
+
+      // ─── INLINE-REGELN PRÜFEN ────────────────────
+      let getroffen = false;
+      for(const regel of REGELN){
+        const m = zeile.match(regel.test);
+        if(m){
+          const ergebnis = regel.mach(m, listeOffen);
+
+          // Listen: zusammenfassen
+          if(ergebnis.sammle){
+            if(listeOffen && listeOffen !== ergebnis.sammle){
+              listeSchliessen();
+            }
+            if(!listeOffen){
+              teile.push(`<${ergebnis.sammle}>`);
+              listeOffen = ergebnis.sammle;
+            }
+            teile.push(ergebnis.html);
+            schritte.push({
+              nr: i+1,
+              was: regel.name,
+              tat: 'listenpunkt in <' + listeOffen + '>',
+            });
+          } else {
+            listeSchliessen();
+            if(ergebnis.html){
+              teile.push(ergebnis.html);
+              schritte.push({
+                nr: i+1,
+                was: regel.name,
+                tat: ergebnis.info,
+              });
+            } else {
+              schritte.push({
+                nr: i+1,
+                was: 'leerzeile',
+                tat: 'übersprungen',
+              });
+            }
+          }
+
+          getroffen = true;
+          break;
+        }
+      }
+
+      // ─── NORMALER ABSATZ ─────────────────────────
+      if(!getroffen && zeile.trim()){
+        listeSchliessen();
+        teile.push(`<p>${inline(zeile)}</p>`);
+        schritte.push({
+          nr: i+1,
+          was: 'absatz',
+          tat: 'zeile wird zu <p>',
+        });
+      }
+    }
+
+    if(imCode){
+      schritte.push({
+        nr: zaehler,
+        was: 'achtung',
+        tat: 'code-block nicht geschlossen',
+      });
+    }
+
+    listeSchliessen();
+    return { html: teile.join('\n'), schritte };
+  }
+
+  /* ─── ANZEIGE AKTUALISIEREN ──────────────────────── */
+  function aktualisiere(){
+    const quelle = mdEl.value;
+    const { html, schritte } = uebersetze(quelle);
+
+    // HTML anzeigen
+    htmlEl.innerHTML = html || '<span style="color:#2a4a3a">· noch nichts übersetzt ·</span>';
+
+    // Lehrer anzeigen
+    if(!schritte.length){
+      lehrerEl.innerHTML = `
+        <div class="schritt">
+          <span class="nr">·</span>
+          <span class="was">tippe links. hier steht, <b>was</b> passiert.</span>
+        </div>`;
+      return;
+    }
+
+    // Letzte 30 Schritte
+    const zeige = schritte.slice(-30);
+    lehrerEl.innerHTML = zeige.map(s => `
+      <div class="schritt">
+        <span class="nr">${s.nr}</span>
+        <span class="was">
+          <b>${esc(s.was)}</b>
+          <span class="pfeil">→</span>
+          <span class="tat">${esc(s.tat)}</span>
+        </span>
+      </div>
+    `).join('') + `
+      <div class="zahl">
+        <b>${schritte.length}</b> zeilen · <b>${html.split('<').length - 1}</b> tags
+      </div>`;
+  }
+
+  /* ─── VORLAGE · DIE README ─────────────────────────
+     Wenn der nutzer auf VORLAGE klickt, wird die
+     kader-README eingefüllt. Damit sieht er sofort,
+     was aus einem echten text wird.
+  ────────────────────────────────────────────────── */
+  const VORLAGE = `# evoMIND — Engine / Tool / Flow
+
+## Identität
+evoMIND ist ein **Tool-Modul**, kein OUR-Slot.
+Es gehört zur **Engine-Schicht** des Systems.
+
+## Zweck
+evoMIND steuert:
+
+- interne Abläufe
+- Flow-Routing
+- Plugin-Hooks
+- Task-Slots
+- Matrix-Intelligenz (9×9)
+
+Es ist ein **Funktionsmodul**, nicht ein Identitätsmodul.
+
+## Genstrang · 6D.SYSTEM
+
+Achsen: x · y · z · u · v · w
+Energie: E2 · E3 · E6 · E8 · E12 · E∞
+Fusion: 6d ⊗ 6e → 6de
+Output: nano · atom · simu · beat∞ · rev · win∞
+
+Drei mal sechs. Achtzehn Zeichen.
+Daraus ist jedes Gen dieses Systems geschrieben.
+
+## Unimatrix 9
+
+Neun Buchstaben: d · e · i · n · o · r · s · u · w
+Neun mal neun = 81.
+Der Raum, in dem alles liegt.
+
+## Struktur
+
+- ID.html — Kern
+- index.html — Darstellung + Engine-Start
+- ENGINE/ — Funktionsdateien
+- README.md — Bedeutung
+
+> Dieses README ist angepasst, nicht allgemein.
+
+---
+
+© iki1uc · atalardan atladatan bizlere sunar
+`;
+
+  function ladeVorlage(){
+    mdEl.value = VORLAGE;
+    aktualisiere();
+  }
+
+  /* ─── STEUERUNG ──────────────────────────────────── */
+  document.getElementById('btnVorlage').addEventListener('click', () => {
+    ladeVorlage();
+    document.querySelectorAll('#steuer button').forEach(b => b.classList.remove('on'));
+    document.getElementById('btnVorlage').classList.add('on');
+  });
+
+  document.getElementById('btnLeeren').addEventListener('click', () => {
+    mdEl.value = '';
+    aktualisiere();
+  });
+
+  document.getElementById('btnKopieren').addEventListener('click', async () => {
+    try{
+      await navigator.clipboard.writeText(htmlEl.innerHTML);
+      const btn = document.getElementById('btnKopieren');
+      const alt = btn.textContent;
+      btn.textContent = 'KOPIERT ·';
+      setTimeout(() => { btn.textContent = alt; }, 1400);
+    }catch(e){
+      alert('kopieren ging nicht. öffne die konsole, dort steht das ergebnis.');
+      console.log(htmlEl.innerHTML);
+    }
+  });
+
+  /* ─── LIVE-ÜBERSETZUNG ──────────────────────────── */
+  mdEl.addEventListener('input', aktualisiere);
+
+  /* ─── KONSOLE-HINWEIS ───────────────────────────── */
+  console.log('');
+  console.log('  readme.html · zeilenübersetzer');
+  console.log('  ─────────────────────────────────');
+  console.log('  markdown rein · html raus');
+  console.log('  jede zeile wird einzeln geprüft.');
+  console.log('  jede regel tut genau eine sache.');
+  console.log('  was rechts passiert, steht in der mitte.');
+  console.log('');
+
+  /* ─── INIT · vorlage laden ──────────────────────── */
+  ladeVorlage();
+
+})();
+</script>
+
+</body>
+</html>
+
