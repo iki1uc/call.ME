@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>readme.html · zeilenübersetzer · markdown → html</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;background:#05070e;color:#8aa8a0;
+            font-family:'Consolas','Courier New',monospace;overflow:hidden}
+
+  /* ─── AUFTEILUNG · DREI SPALTEN ──────────────────── */
+  #werkstatt{
+    display:grid;
+    grid-template-columns: 1fr 1fr 0.6fr;
+    height:100vh;
+    gap:0;
+  }
+  @media(max-width:900px){
+    #werkstatt{grid-template-columns:1fr;grid-template-rows:1fr 1fr auto}
+  }
+
+  .spalte{
+    display:flex;flex-direction:column;
+    border-right:1px solid rgba(120,220,150,.06);
+    overflow:hidden;
+  }
+  .spalte:last-child{border-right:none}
+
+  .kopf{
+    flex:0 0 auto;
+    padding:12px 16px;
+    font-size:9px;letter-spacing:.4em;
+    color:#3a5a4a;
+    background:rgba(0,0,0,.4);
+    border-bottom:1px solid rgba(120,220,150,.06);
+    display:flex;justify-content:space-between;align-items:center;
+  }
+  .kopf b{color:#8cf0d0;font-weight:400}
+  .kopf .marke{color:#f0d080;font-size:8px;letter-spacing:.3em}
+
+  .inhalt{flex:1;overflow:auto;padding:0}
+  .inhalt::-webkit-scrollbar{width:6px;height:6px}
+  .inhalt::-webkit-scrollbar-thumb{background:#1a2a3a;border-radius:3px}
+  .inhalt::-webkit-scrollbar-track{background:transparent}
+
+  /* ─── EINGABE · MARKDOWN ─────────────────────────── */
+  textarea#md{
+    width:100%;height:100%;
+    background:transparent;
+    color:#c0d0d0;
+    font-family:'Consolas','Courier New',monospace;
+    font-size:12px;line-height:1.7;
+    border:none;outline:none;
+    padding:20px;
+    resize:none;
+    tab-size:2;
+  }
+
+  /* ─── AUSGABE · HTML ─────────────────────────────── */
+  #html{
+    padding:20px 22px;
+    font-size:12.5px;line-height:1.7;
+    color:#c0d0d0;
+    overflow-wrap:break-word;
+  }
+  #html h1{
+    font-size:20px;font-weight:300;
+    letter-spacing:.08em;
+    color:#f0d080;
+    margin:18px 0 12px;
+    padding-bottom:6px;
+    border-bottom:1px solid rgba(240,208,128,.15);
+  }
+  #html h2{
+    font-size:15px;font-weight:400;
+    letter-spacing:.1em;
+    color:#8cf0d0;
+    margin:16px 0 8px;
+  }
+  #html h3{
+    font-size:13px;font-weight:400;
+    color:#b388ff;
+    margin:12px 0 6px;
+  }
+  #html p{margin:8px 0;line-height:1.8}
+  #html strong{color:#8cf0d0;font-weight:bold}
+  #html em{color:#b388ff;font-style:italic}
+  #html code{
+    background:rgba(140,240,208,.08);
+    padding:1px 6px;border-radius:3px;
+    font-size:0.95em;color:#8cf0d0;
+  }
+  #html pre{
+    background:rgba(0,0,0,.5);
+    padding:12px 14px;border-radius:4px;
+    border-left:2px solid #3a5a4a;
+    margin:10px 0;overflow-x:auto;
+    font-size:11.5px;line-height:1.6;color:#a0c8b8;
+  }
+  #html pre code{background:none;padding:0;color:#a0c8b8}
+  #html ul,#html ol{margin:8px 0 8px 22px}
+  #html li{margin:4px 0;color:#8aa8a0}
+  #html a{color:#8cf0d0;text-decoration:none;border-bottom:1px dotted #3a5a4a}
+  #html a:hover{border-bottom-color:#8cf0d0}
+  #html hr{
+    border:none;border-top:1px solid rgba(120,220,150,.1);
+    margin:18px 0;
+  }
+  #html blockquote{
+    border-left:2px solid #f0d080;
+    padding:6px 14px;margin:10px 0;
+    color:#8aa8a0;font-style:italic;
+    background:rgba(240,208,128,.03);
+  }
+
+  /* ─── LEHRER · DRITTE SPALTE ─────────────────────── */
+  #lehrer{padding:14px 16px;font-size:10px;line-height:1.9;color:#3a5a4a}
+  #lehrer .schritt{
+    padding:6px 0;
+    border-bottom:1px dashed rgba(120,220,150,.06);
+    display:flex;gap:8px;align-items:baseline;
+  }
+  #lehrer .schritt:last-child{border-bottom:none}
+  #lehrer .nr{color:#2a4a3a;min-width:18px;font-size:9px}
+  #lehrer .was{color:#8aa8a0;flex:1}
+  #lehrer .was b{color:#8cf0d0;font-weight:400}
+  #lehrer .pfeil{color:#f0d080;margin:0 4px}
+  #lehrer .tat{color:#b388ff}
+
+  #lehrer .zahl{
+    margin-top:14px;padding-top:12px;
+    border-top:1px solid rgba(120,220,150,.08);
+    color:#3a5a4a;font-size:9px;letter-spacing:.3em;
+  }
+  #lehrer .zahl b{color:#f0d080;font-weight:400}
+
+  /* ─── KOPF-MARKE · GEMEINSAME ZEICHEN ────────────── */
+  .ecke{position:fixed;width:14px;height:14px;
+        z-index:998;pointer-events:none;opacity:.28;
+        border-color:#8cf0d0}
+  .ecke.ol{top:12px;left:12px;border-top:1px solid;border-left:1px solid}
+  .ecke.or{top:12px;right:12px;border-top:1px solid;border-right:1px solid}
+  .ecke.ul{bottom:12px;left:12px;border-bottom:1px solid;border-left:1px solid}
+  .ecke.ur{bottom:12px;right:12px;border-bottom:1px solid;border-right:1px solid}
+
+  /* ─── STEUERUNG ──────────────────────────────────── */
+  #steuer{
+    position:fixed;top:14px;left:50%;transform:translateX(-50%);
+    display:flex;gap:6px;z-index:1000;
+    background:rgba(5,7,14,.9);backdrop-filter:blur(8px);
+    border:1px solid rgba(120,220,150,.08);border-radius:4px;
+    padding:5px;
+  }
+  #steuer button{
+    background:transparent;border:1px solid #1a2a3a;
+    color:#3a5a4a;font-family:inherit;font-size:8.5px;
+    letter-spacing:.3em;padding:5px 12px;cursor:pointer;
+    transition:all .3s;
+  }
+  #steuer button:hover{color:#8cf0d0;border-color:#3a5a4a}
+  #steuer button.on{color:#f0d080;border-color:#f0d080}
+
+  /* ─── MOBIL ──────────────────────────────────────── */
+  @media(max-width:900px){
+    textarea#md{font-size:11px;padding:14px}
+    #html{padding:14px 16px;font-size:12px}
+    #lehrer{font-size:9.5px;padding:10px 12px;max-height:160px;overflow-y:auto}
+    #steuer{top:auto;bottom:14px;padding:4px}
+    #steuer button{font-size:8px;padding:4px 8px}
+  }
+</style>
+</head>
+<body>
+
+<div id="steuer">
+  <button id="btnVorlage" class="on">VORLAGE</button>
+  <button id="btnLeeren">LEEREN</button>
+  <button id="btnKopieren">HTML KOPIEREN</button>
+</div>
+
+<div id="werkstatt">
+
+  <!-- SPALTE 1 · MARKDOWN EINGEBEN -->
+  <div class="spalte">
+    <div class="kopf">
+      <span><b>markdown</b> · die quelle</span>
+      <span class="marke">schreib hier</span>
+    </div>
+    <div class="inhalt">
+      <textarea id="md" spellcheck="false" placeholder="# Überschrift
+**fett** und *kursiv*
+
+- punkt eins
+- punkt zwei
+
+`code` inline und:
