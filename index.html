@@ -2,63 +2,388 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>evoMIND</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<!-- ═══ KOPF-SPERRE · atomar ══════════════════════════ -->
+<meta http-equiv="Content-Security-Policy" content="
+  default-src 'self';
+  script-src 'self' 'unsafe-inline';
+  style-src 'self' 'unsafe-inline';
+  img-src 'self' data:;
+  font-src 'self';
+  connect-src 'self';
+  frame-ancestors 'self';
+  base-uri 'self';
+  form-action 'self';
+  object-src 'none';
+  upgrade-insecure-requests;
+">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta name="permissions-policy" content="
+  camera=(), microphone=(), geolocation=(),
+  payment=(), usb=(), magnetometer=(), gyroscope=()
+">
+
+<title>evoMIND · index · iki1uc</title>
 
 <style>
-    body {
-        font-family: monospace;
-        background: #f5f5f5;
-        color: #222;
-        padding: 40px;
-        text-align: center;
-    }
-    suite {
-        display: block;
-        font-size: 32px;
-        margin-bottom: 20px;
-        font-weight: bold;
-    }
-    slide {
-        display: block;
-        font-size: 18px;
-        margin-bottom: 20px;
-        opacity: 0.7;
-    }
-    .puzzle {
-        font-size: 26px;
-        padding: 20px;
-        border: 2px dashed #444;
-        display: inline-block;
-        margin-top: 20px;
-    }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;background:#05070e;color:#8aa8a0;
+            font-family:'Consolas','Courier New',monospace;overflow:hidden}
+
+  canvas{display:block;position:fixed;inset:0}
+
+  /* ─── KOPF ──────────────────────────────────────── */
+  #kopf{
+    position:fixed;top:44px;left:50%;transform:translateX(-50%);
+    text-align:center;z-index:6;pointer-events:none;
+  }
+  #kopf .marke{
+    font-size:9px;letter-spacing:.55em;color:#2a4a3a;
+    margin-bottom:10px;
+  }
+  #kopf h1{
+    font-size:clamp(20px,4vw,38px);
+    font-weight:100;letter-spacing:.4em;
+    background:linear-gradient(135deg,#8cf0d0,#f0d080 55%,#b388ff);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    margin-bottom:10px;
+  }
+  #kopf .unter{
+    font-size:10px;letter-spacing:.4em;color:#3a5a4a;
+    line-height:2.2;
+  }
+  #kopf .unter b{color:#8cf0d0;font-weight:400}
+
+  /* ─── DIE TÜREN ─────────────────────────────────── */
+  #tueren{
+    position:fixed;top:50%;left:50%;
+    transform:translate(-50%,-50%);
+    display:flex;flex-direction:column;
+    gap:14px;z-index:7;
+    align-items:center;
+    padding:28px 32px;
+    background:rgba(5,7,14,.65);
+    backdrop-filter:blur(6px);
+    border:1px solid rgba(120,220,150,.06);
+    border-radius:4px;
+  }
+  #tueren a{
+    color:#8aa8a0;text-decoration:none;
+    font-size:11px;letter-spacing:.4em;
+    padding:6px 20px;
+    border-bottom:1px solid transparent;
+    transition:all .35s;
+    white-space:nowrap;
+    display:flex;align-items:center;gap:12px;
+  }
+  #tueren a .mark{
+    width:6px;height:6px;border-radius:50%;
+    background:currentColor;opacity:.4;
+    transition:opacity .35s;
+  }
+  #tueren a:hover{
+    color:#8cf0d0;
+    border-bottom-color:rgba(140,240,208,.4);
+  }
+  #tueren a:hover .mark{opacity:1}
+  #tueren a.gold:hover{color:#f0d080;border-bottom-color:rgba(240,208,128,.4)}
+  #tueren a.purpur:hover{color:#b388ff;border-bottom-color:rgba(179,136,255,.4)}
+
+  /* ─── SETZUNG · UNTEN ───────────────────────────── */
+  #setzung{
+    position:fixed;bottom:40px;left:50%;transform:translateX(-50%);
+    text-align:center;z-index:6;pointer-events:none;
+    max-width:min(92vw,760px);
+    line-height:2.2;
+  }
+  #setzung .zeile{
+    font-size:10px;letter-spacing:.35em;color:#3a5a4a;
+  }
+  #setzung .zeile b{color:#8cf0d0;font-weight:400}
+  #setzung .zeile.gold b{color:#f0d080}
+  #setzung .zeile.purpur b{color:#b388ff}
+  #setzung .trenn{
+    width:40px;height:1px;background:rgba(120,220,150,.15);
+    margin:12px auto;
+  }
+
+  /* ─── STATUS · RECHTS OBEN ──────────────────────── */
+  #status{
+    position:fixed;top:22px;right:22px;z-index:6;pointer-events:none;
+    font-size:8.5px;letter-spacing:.3em;color:#2a4a3a;
+    text-align:right;line-height:2;
+  }
+  #status .v{color:#8cf0d0}
+  #status .g{color:#f0d080}
+  #status .r{color:#b388ff}
+  #status .warn{color:#f0d080}
+
+  /* ─── FUSS ──────────────────────────────────────── */
+  #fuss{
+    position:fixed;bottom:14px;right:20px;
+    font-size:9px;letter-spacing:.35em;color:#1e3328;
+    z-index:6;
+  }
+  #fuss b{color:#3a5a4a;font-weight:400}
+
+  /* ─── ZEICHEN ───────────────────────────────────── */
+  .ecke{position:fixed;width:14px;height:14px;
+        z-index:998;pointer-events:none;opacity:.28;
+        border-color:#8cf0d0}
+  .ecke.ol{top:12px;left:12px;border-top:1px solid;border-left:1px solid}
+  .ecke.or{top:12px;right:12px;border-top:1px solid;border-right:1px solid}
+  .ecke.ul{bottom:12px;left:12px;border-bottom:1px solid;border-left:1px solid}
+  .ecke.ur{bottom:12px;right:12px;border-bottom:1px solid;border-right:1px solid}
+
+  @media(max-width:640px){
+    #tueren{gap:10px;padding:20px 22px}
+    #tueren a{font-size:9.5px;letter-spacing:.3em;padding:5px 12px}
+    #setzung{bottom:24px}
+    #setzung .zeile{font-size:8.5px;letter-spacing:.25em}
+    #fuss{font-size:7.5px;bottom:8px}
+  }
 </style>
 </head>
-
 <body>
 
-<suite>evoMIND</suite>
-<slide>dimension.flow()</slide>
+<!-- ═══ WÄCHTER · ZUERST · VOR ALLEM ═══════════════════ -->
+<script src="security.js"></script>
 
-<div class="puzzle" data-piece="evoMIND">
-    ((( evoMIND dimension.flow() )))
+<canvas id="cv"></canvas>
+
+<div id="kopf">
+  <div class="marke">iki1uc · kader</div>
+  <h1>evoMIND</h1>
+  <div class="unter">
+    <b>dimension.flow()</b><br>
+    engine · tool · flow
+  </div>
 </div>
 
+<div id="tueren">
+  <a href="ID.html"><span class="mark"></span>id · identität</a>
+  <a href="readme.html" class="gold"><span class="mark"></span>readme · wegbeschreibung</a>
+  <a href="anker.html" class="purpur"><span class="mark"></span>anker · der erste code</a>
+  <a href="block.html" class="gold"><span class="mark"></span>block · frieden</a>
+  <a href="geo.rad" class="purpur"><span class="mark"></span>geo · geometrie</a>
+  <a href="schub.md" class="gold"><span class="mark"></span>schub · die sechs</a>
+</div>
+
+<div id="status">
+  <div>wache · <span class="v" id="wache">aktiv</span></div>
+  <div>protokoll · <span class="v" id="proto">—</span></div>
+  <div>blockiert · <span class="warn" id="blk">0</span></div>
+</div>
+
+<div id="setzung">
+  <div class="zeile">sechs dateien · ein zentrum</div>
+  <div class="zeile gold"><b>aggregator · continuum · healt · quant · sli · stage</b></div>
+  <div class="trenn"></div>
+  <div class="zeile purpur"><b>implosion ist sammlung nach innen</b></div>
+  <div class="zeile">kein verlust · frieden</div>
+</div>
+
+<div id="fuss">
+  <b>iki1uc</b> · evoMIND · <span id="zeit">--:--</span>
+</div>
+
+<div class="ecke ol"></div>
+<div class="ecke or"></div>
+<div class="ecke ul"></div>
+<div class="ecke ur"></div>
+
 <script>
-// Sichtbares Startsignal
-console.log("evoMIND geladen");
+/* ═══════════════════════════════════════════════════════════
+   index.html · evoMIND · atomar sicher
+   ═══════════════════════════════════════════════════════════
+   Der eingang. Er zeigt:
+     - sechs ringe (die sechs stationen)
+     - ein zentrum (implosion)
+     - die türen zu allen anderen dateien
+     - den bericht des wächters
+   ═══════════════════════════════════════════════════════════ */
 
-// Engine‑Start (dein System)
-if (window.CUBE_MIND && window.MATRIX9x9) {
-    const start = window.CUBE_MIND.start();
-    console.log("CUBE_MIND:", start);
+(function(){
+  'use strict';
 
-    // Sichtbare Ausgabe
-    const out = document.createElement("pre");
-    out.textContent = JSON.stringify(start, null, 2);
-    document.body.appendChild(out);
-} else {
-    console.warn("Engine nicht geladen");
-}
+  /* ─── ZEIT ──────────────────────────────────────── */
+  function setzeZeit(){
+    const j = new Date();
+    const hh = String(j.getHours()).padStart(2,'0');
+    const mm = String(j.getMinutes()).padStart(2,'0');
+    document.getElementById('zeit').textContent = hh + ':' + mm;
+  }
+  setzeZeit();
+  setInterval(setzeZeit, 30000);
+
+  /* ─── WÄCHTER-BERICHT LESEN ───────────────────────
+     security.js muss VOR diesem skript gelaufen sein.
+     Wenn es lief, steht window.__EVO_BERICHT bereit.
+  ─────────────────────────────────────────────────── */
+  setTimeout(() => {
+    const b = window.__EVO_BERICHT;
+    if(!b){
+      document.getElementById('wache').textContent = 'kein bericht';
+      document.getElementById('wache').style.color = '#f0d080';
+      document.getElementById('proto').textContent = 'ohne wächter';
+      return;
+    }
+    document.getElementById('proto').textContent = b.protokoll.replace(':','');
+    document.getElementById('blk').textContent = b.blockiert.length;
+    if(b.fehler.length){
+      document.getElementById('wache').textContent = 'fehler';
+      document.getElementById('wache').style.color = '#b388ff';
+    }
+  }, 400);
+
+  /* ─── CANVAS · DIE SECHS RINGE ──────────────────── */
+  const cv = document.getElementById('cv');
+  const ctx = cv.getContext('2d');
+  let cx, cy;
+
+  function resize(){
+    const dpr = Math.min(devicePixelRatio, 2);
+    cv.width  = innerWidth * dpr;
+    cv.height = innerHeight * dpr;
+    cv.style.width  = innerWidth + 'px';
+    cv.style.height = innerHeight + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    cx = innerWidth / 2;
+    cy = innerHeight / 2;
+  }
+  addEventListener('resize', resize);
+  resize();
+
+  /* Die sechs stationen */
+  const STATIONEN = [
+    { a: 0,               farbe:'#8cf0d0', name:'aggregator' },
+    { a: Math.PI / 3,     farbe:'#f0d080', name:'continuum'  },
+    { a: 2 * Math.PI / 3, farbe:'#7ee0a0', name:'healt'      },
+    { a: Math.PI,         farbe:'#b388ff', name:'quant'      },
+    { a: 4 * Math.PI / 3, farbe:'#a0c8b8', name:'sli'        },
+    { a: 5 * Math.PI / 3, farbe:'#8aa8a0', name:'stage'      },
+  ];
+
+  let t = 0;
+
+  function zeichne(){
+    requestAnimationFrame(zeichne);
+    t += 0.006;
+
+    // Sanftes Wischen — verhindert Schlierenbildung
+    ctx.fillStyle = 'rgba(5,7,14,0.2)';
+    ctx.fillRect(0, 0, innerWidth, innerHeight);
+
+    // Implosion atmet
+    const atem = 0.5 + 0.5 * Math.sin(t * 0.6);
+    const k = 0.5 + atem * 0.4;
+
+    // Radius: schrumpft, wenn Implosion stark
+    const R = Math.min(innerWidth, innerHeight) * 0.28 * (1 - k * 0.15);
+
+    /* ─── SECHS RINGE · die stationen ─────────────── */
+    STATIONEN.forEach((s, i) => {
+      const a = s.a + t * 0.15;
+      const x = cx + Math.cos(a) * R;
+      const y = cy + Math.sin(a) * R;
+
+      // Ring um die station
+      ctx.beginPath();
+      ctx.arc(x, y, 8 + k * 4, 0, Math.PI * 2);
+      ctx.strokeStyle = s.farbe;
+      ctx.globalAlpha = 0.15 + k * 0.2;
+      ctx.lineWidth = 0.8;
+      ctx.stroke();
+
+      // Punkt
+      ctx.beginPath();
+      ctx.arc(x, y, 2.5 + k * 1.5, 0, Math.PI * 2);
+      ctx.fillStyle = s.farbe;
+      ctx.globalAlpha = 0.5 + k * 0.5;
+      ctx.fill();
+
+      // Linie zum Zentrum
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(cx, cy);
+      ctx.strokeStyle = s.farbe;
+      ctx.globalAlpha = 0.06 + k * 0.1;
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+
+      ctx.globalAlpha = 1;
+    });
+
+    /* ─── ZENTRUM · implosion ────────────────────── */
+    const kernGroesse = 24 * (1 - k * 0.25);
+
+    // Drei schrumpfende Ringe
+    [90, 60, 34].forEach((r0, i) => {
+      const r = r0 * (1 - k * 0.15);
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.strokeStyle = ['rgba(140,240,208,.12)',
+                         'rgba(240,208,128,.14)',
+                         'rgba(179,136,255,.16)'][i];
+      ctx.lineWidth = 0.7;
+      ctx.stroke();
+    });
+
+    // Kern
+    const glut = ctx.createRadialGradient(cx, cy, 0, cx, cy, kernGroesse * 2.5);
+    glut.addColorStop(0, `rgba(140,240,208,${0.4 + k * 0.4})`);
+    glut.addColorStop(0.5, `rgba(240,208,128,${0.1 + k * 0.15})`);
+    glut.addColorStop(1, 'rgba(140,240,208,0)');
+    ctx.beginPath();
+    ctx.arc(cx, cy, kernGroesse * 2.5, 0, Math.PI * 2);
+    ctx.fillStyle = glut;
+    ctx.fill();
+
+    // Kernpunkt
+    ctx.beginPath();
+    ctx.arc(cx, cy, 1.5 + k * 1.5, 0, Math.PI * 2);
+    ctx.fillStyle = '#8cf0d0';
+    ctx.fill();
+
+    /* ─── INNEN-PULS ─ die sechs laufen nach innen */
+    for(let i = 0; i < 6; i++){
+      const ph = (t * 0.5 + i / 6) % 1;
+      const r = R * (1 - ph);
+      if(r < 8) continue;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(140,240,208,${0.1 * (1 - ph)})`;
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+    }
+
+    /* ─── ATOMSPUR · ganz außen · der sichere rand ─ */
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(t * 0.04);
+    for(let i = 0; i < 3; i++){
+      ctx.beginPath();
+      ctx.ellipse(0, 0, R * 1.55, R * 1.55 * 0.35, i * Math.PI / 3, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(120,220,150,0.045)';
+      ctx.lineWidth = 0.8;
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+  zeichne();
+
+  /* ─── KONSOLE ───────────────────────────────────── */
+  console.log('');
+  console.log('  evoMIND · index · iki1uc');
+  console.log('  ─────────────────────────────────');
+  console.log('  wächter · ' + (window.__EVO_WACHE ? 'geladen' : 'FEHLT'));
+  console.log('  türen · id · readme · anker · block · geo · schub');
+  console.log('  atomar · implosion · kein verlust');
+  console.log('');
+
+})();
 </script>
 
 </body>
